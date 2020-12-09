@@ -1,0 +1,101 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+PART C
+
+Switch>
+Switch>en
+Switch#conf t
+Switch(config)#access-list 2 deny 10.10.10.3 142.3.2.1
+Switch(config)#access-list 2 permit any
+Switch(config)#int fa0/3
+Switch(config-if)#ip access-group 2 out
+Switch(config-if)#exit
+Switch(config)#
+Switch#
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+PART D
+
+Router>
+Router>en
+Router#conf
+Router#configure t
+Router(config)#access-list 2 deny 10.10.10.3 142.3.2.2	
+Router(config)#access-list 2  permit any
+Router(config)#int fa 0/0
+Router(config-if)#ip access-group 2 in
+Router(config-if)#exit
+Router(config)#
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+
+PART F
+
+Router>
+Router>en
+Router#configure t
+Router(config)#access-list 2 deny 10.10.10.0 0.0.0.255  
+Router(config)#access-list 2 permit any
+Router(config)#int fa 0/0
+Router(config-if)#ip access-group 2 in
+Router(config-if)#exit
+Router(config)#
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+PART G
+
+Router>
+Router>en
+Router#configure t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#access-list 102 permit udp 10.0.0.0 0.255.255.255 any eq domain
+Router(config)#access-list 102 permit tcp 10.0.0.0 0.255.255.255 any eq www
+Router(config)#int fa 0/0
+Router(config-if)#ip access-group 102 in
+Router(config-if)#exit
+Router(config)#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
