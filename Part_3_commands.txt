@@ -1,0 +1,161 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+PART H
+
+Assigning IP addresses
+
+ciscoasa(config)#
+ciscoasa(config)#int g1/1
+ciscoasa(config-if)#nameif inside
+ciscoasa(config-if)#security-level 100
+ciscoasa(config-if)#ip address 10.10.30.2 255.255.255.0
+ciscoasa(config-if)#exit
+ciscoasa(config)#
+ciscoasa(config)#int g1/2
+ciscoasa(config-if)#nameif outside
+INFO: Security level for "outside" set to 0 by default.
+ciscoasa(config-if)#security-level 0
+ciscoasa(config-if)#ip add
+ciscoasa(config-if)#ip address 142.3.2.1 255.255.255.0
+ciscoasa(config-if)#exit
+ciscoasa(config)#
+ciscoasa(config)#int g1/3
+ciscoasa(config-if)#nameif dmz
+INFO: Security level for "dmz" set to 0 by default.
+ciscoasa(config-if)#security-level 50
+ciscoasa(config-if)#ip address 10.40.40.3 255.255.255.0
+ciscoasa(config-if)#exit
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Configuring NAT to allow the hosts to access Internet
+
+ciscoasa#con
+ciscoasa#configure t
+ciscoasa(config)#object network dmz-subnet
+ciscoasa(config-network-object)#subnet 10.40.40.0 255.255.255.0
+ciscoasa(config-network-object)#nat (dmz,outside) dynamic interface
+ciscoasa(config-network-object)#exit
+ciscoasa#
+ciscoasa#configure t
+ciscoasa(config)#object network inside-subnet
+ciscoasa(config-network-object)#subnet 10.10.0.0 255.255.255.0
+ciscoasa(config-network-object)#nat (inside,outside) dynamic interface
+ciscoasa(config-network-object)#exit
+ciscoasa#
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Configuring NAT to access web server from internet
+
+ciscoasa#conf t
+ciscoasa(config)#object network webserver1
+ciscoasa(config-network-object)#host 10.40.40.1
+ciscoasa(config-network-object)#nat (dmz,outside) static 142.3.2.100
+ciscoasa(config-network-object)#exit
+ciscoasa#
+ciscoasa#conf t
+ciscoasa(config)#object network webserver2
+ciscoasa(config-network-object)#host 10.40.40.2
+ciscoasa(config-network-object)#nat (dmz,outside) static 142.3.2.101
+ciscoasa(config-network-object)#exit
+ciscoasa#
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Configuring ACL
+
+ciscoasa#conf t 
+ciscoasa(config)#access-list in_reply extended permit icmp any any echo-reply
+ciscoasa(config)#access-list in_reply extended permit icmp any any unreachable
+ciscoasa(config)#object network webserver-external-ip
+ciscoasa(config-network-object)#host 142.3.2.100
+ciscoasa(config-network-object)#exit
+ciscoasa#conf t
+ciscoasa(config)#access-list in_reply extended permit tcp any object webserver1 eq www
+ciscoasa(config)#access-list in_reply extended permit tcp any object webserver2 eq www
+ciscoasa(config)#access-list in_reply extended permit tcp any host 142.3.2.100 eq www
+ciscoasa(config)#access-list in_reply extended permit tcp any host 142.3.2.101 eq www
+ciscoasa(config)#exit
+ciscoasa#conf t
+ciscoasa(config)#access-gr
+ciscoasa(config)#access-group in_reply in interface outside
+ciscoasa(config)#exit
+ciscoasa#
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Dynamic routing
+
+ciscoasa(config)#router rip
+ciscoasa(config-router)#network 10.0.0.0
+ciscoasa(config-router)#network 142.3.2.0
+ciscoasa(config-router)#exit
+ciscoasa(config)#access-list inside_web extended permit tcp any any eq www
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Access group
+
+ciscoasa(config)#access-list 110 extended permit tcp 10.10.0.0 255.255.0.0 any eq www
+ciscoasa(config)#access-list 110 extended permit tcp any eq www 10.10.0.0 255.255.0.0
+ciscoasa(config)#access-list 110 extended permit tcp any eq www 10.40.40.0 255.255.255.0
+ciscoasa(config)#access-list 110 extended permit tcp any host 142.3.2.101 eq www
+ciscoasa(config)#access-list 110 extended permit tcp any host 142.3.2.100 eq www
+ciscoasa(config)#access-list 120 extended permit tcp any eq www 10.10.0.0 255.255.0.0
+ciscoasa(config)#access-list 130 extended permit tcp any eq www 10.40.40.0 255.255.255.0
+ciscoasa(config)#access-group 110 in interface outside
+ciscoasa(config)#access-group 130 in interface dmz
+ciscoasa(config)#access-group 120 in interface inside
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Static routing
+
+ciscoasa(config)#route outside 0.0.0.0 0.0.0.0 142.3.2.2
+ciscoasa(config)#route inside 10.10.0.0 255.255.0.0 10.10.30.1
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Access list
+
+ciscoasa(config)#access-list 130 extended permit udp any any
+ciscoasa(config)#access-list 120 extended permit udp any any
+ciscoasa(config)#access-list 110 extended permit udp any any
+ciscoasa(config)#access-group 130 in interface dmz
+ciscoasa(config)#access-group 120 in interface inside
+ciscoasa(config)#access-group 110 in interface outside
+ciscoasa(config)#access-list 130 extended permit tcp 10.40.40.0 255.255.255.0 eq www 10.10.0.0 255.255.0.0
+ciscoasa(config)#access-group 130 in interface dmz
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

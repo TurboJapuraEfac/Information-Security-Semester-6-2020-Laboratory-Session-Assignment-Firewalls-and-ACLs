@@ -1,0 +1,169 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ROUTER CONFIGURATION
+
+Router>en
+Router#configure terminal 
+Enter configuration commands, one per line.  End with CNTL/Z.
+
+Router(config)#interface fa 0/0
+Router(config-if)#ip address 10.10.30.2 255.255.255.0
+Router(config-if)#no shutdown 
+Router(config-if)#
+%LINK-5-CHANGED: Interface FastEthernet0/0, changed state to up
+Router(config-if)#exit
+	
+Router(config)#interface fastEthernet 1/0
+Router(config-if)#ip address 142.3.2.1 255.255.255.0
+Router(config-if)#no shutdown 
+Router(config-if)#
+%LINK-5-CHANGED: Interface FastEthernet1/0, changed state to up
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet1/0, changed state to up
+Router(config-if)#exit
+
+Router#configure t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#router rip
+Router(config-router)#network 10.0.0.0
+Router(config-router)#network 142.3.0.0
+Router(config-router)#exit
+Router(config)#exit
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+L3 SWITCH CONFIGURATION
+
+Switch>en
+Switch#configure t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Switch(config)#interface fa 0/3
+Switch(config-if)#no switchport 
+Switch(config-if)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/3, changed state to down
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/3, changed state to up
+Switch(config-if)#ip address 10.10.30.1 255.255.255.0
+Switch(config-if)#exit
+
+
+Switch(config)#int fa0/1
+Switch(config-if)#switchport mode access 
+Switch(config-if)#switchport mode trunk 
+Switch(config-if)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/1, changed state to down
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/1, changed state to up
+Switch(config-if)#switchport access vlan 10
+% Access VLAN does not exist. Creating vlan 10
+Switch(config-if)#switchport access vlan 20
+% Access VLAN does not exist. Creating vlan 20
+Switch(config-if)#exit
+
+Switch(config)#int fa0/2
+Switch(config-if)#switchport mode access 
+Switch(config-if)#switchport mode trunk 
+Switch(config-if)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/2, changed state to down
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/2, changed state to up
+Switch(config-if)#switchport access vlan 10
+Switch(config-if)#switchport access vlan 20
+Switch(config-if)#exit
+
+Switch#configure t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Switch(config)#int vlan 10
+Switch(config-if)#ip address 10.10.10.254 255.255.255.0
+Switch(config-if)#exit
+Switch(config)#int vlan 20
+Switch(config-if)#ip address 10.10.20.254 255.255.255.0
+Switch(config-if)#exit
+Switch(config)#
+
+Switch(config)#ip routing
+Switch(config)#router rip
+Switch(config-router)#network 10.0.0.0
+Switch(config-router)#exit
+Switch(config)#
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+L2 SWITCH1 CONFIGURATION
+
+Switch#config t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Switch(config)#interface  fa3/1
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport mode trunk 
+Switch(config-if)#exit
+
+Switch(config)#interface fa0/1
+Switch(config-if)#switchport access vlan 10
+Switch(config-if)#exit
+Switch(config)#interface fa1/1
+Switch(config-if)#switchport access vlan 20
+Switch(config-if)#exit
+Switch(config)#interface fa2/1
+Switch(config-if)#switchport access vlan 10
+Switch(config-if)#exit
+
+
+L2 SWITCH2 CONFIGURATION
+
+Switch#configure t
+Switch(config)#int fa2/1
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport mode trunk 
+Switch(config-if)#exit
+
+Switch(config)#int fa0/1
+Switch(config-if)#switchport access vlan 20
+Switch(config-if)#exit
+Switch(config)#interface fa1/1
+Switch(config-if)#switchport access vlan 10
+Switch(config-if)#exit
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+NAT 
+
+Router#conf t
+Router(config)#access-list 1 permit 10.0.0.0 0.255.255.255
+Router(config)#ip nat pool public 192.168.1.1 192.168.1.100 netmask 255.255.255.0
+
+Router(config)#int fa 0/0
+Router(config-if)#ip nat inside
+Router(config-if)#exit
+Router(config)#int fa 1/0
+Router(config-if)#ip nat outside
+Router(config-if)#exit
+Router(config)#ip nat inside source list 1 pool public
+Router(config)#exit
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
